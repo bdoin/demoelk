@@ -14,7 +14,7 @@ grands concepts derrière les outils `Elasticsearch
 Comment ça marche
 =================
 
-La présentation utilise `reavel.js
+La présentation utilise `reveal.js
 <http://lab.hakim.se/reveal-js/#/>`_. Pour la visualiser : ::
 
   git clone git@github.com:bdoin/demoelk.git
