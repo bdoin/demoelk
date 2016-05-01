@@ -62,3 +62,12 @@ sauver dans Elasticsearch avec : ::
 
 Dans Kibana, faire une visualisation de type *tyle map* sur le champs
 *coordinates*.
+
+Démo Logstash
+==============
+
+Les log viennent de apache sur gcompris.net. Mettre le fichier dans /tmp/gcomris.log puis lancer : ::
+
+  /opt/logstash/bin/logstash -f http_parsing.conf
+
+Dans Kibana faire une visualisation par exemple de type *tyle map*.
