@@ -109,7 +109,7 @@ http://localhost:5601</code></pre>
 awk '{ printf {"volume":%s , "@timestamp":"%s"}, $7,
               strftime("%FT%T,0+0200",systime()); }' |
 curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
-          <p>Et on observe le resultat dans Kibana.</p>
+          <p>Et on observe le resultat dans <a target="_blank" href="http://localhost:5601/#/visualize/edit/Applodimetre-courbe?_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),vis:(aggs:!((id:'1',params:(field:volume),schema:metric,type:avg),(id:'2',params:(customInterval:'2h',extended_bounds:(),field:'@timestamp',interval:s,min_doc_count:1),schema:segment,type:date_histogram)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,radiusRatio:9,scale:linear,setYExtents:!t,shareYAxis:!t,showCircles:!t,smoothLines:!t,times:!(),yAxis:(max:100,min:0)),type:line))&_g=(refreshInterval:(display:'1%20seconds',pause:!f,section:1,value:1000),time:(from:now-30s,mode:relative,to:now))">Kibana</a>.</p>
         </section>
 
         <section>
