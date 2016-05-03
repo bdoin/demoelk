@@ -17,18 +17,30 @@
     <link rel="stylesheet" href="revealjs/css/reveal.css">
     <link rel="stylesheet" href="revealjs/css/theme/beige.css" id="theme">
 
-    <!-- Theme used for syntax highlighting of code -->
-    <link rel="stylesheet" href="revealjs/lib/css/zenburn.css">
-
     <!-- Printing and PDF exports -->
     <script>
       var link = document.createElement( 'link' );
       link.rel = 'stylesheet';
       link.type = 'text/css';
-      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'revealjs/css/print/pdf.css' : 'revealjs/css/print/paper.css';
       document.getElementsByTagName( 'head' )[0].appendChild( link );
     </script>
-
+    <script src="jquery-2.2.3.min.js"></script>
+    <script>
+      <!-- Add put and delete shortcuts to jquery-->
+       jQuery.each( [ "put", "delete" ], function( i, method ) {
+          jQuery[ method ] = function( url, data, callback, type ) {
+            return jQuery.ajax({
+              url: url,
+              type: method,
+              dataType: type,
+              data: data,
+              success: callback,
+              error: callback
+            });
+          };
+        });
+    </script>
     <!--[if lt IE 9]>
         <script src="lib/js/html5shiv.js"></script>
         <![endif]-->
@@ -46,13 +58,383 @@
           <p>
             <small>Créé par Alexandre Cabrol et Bruno Coudoin</small>
           </p>
+          <p>Code source de la présentation (en <a href='http://lab.hakim.se/reveal-js/'>reveal.js</a>) et des démos : <a href='https://github.com/bdoin/demoelk'>git@github.com:bdoin/demoelk.git</a></p>
         </section>
 
         <section>
           <h2>Elasticsearch</h2>
           <p>
-            Elasticsearch est un serveur utilisant Lucene pour l'indexation et la recherche des données. Il fournit un moteur de recherche distribué et multi-entité à travers une interface REST. C'est un logiciel libre écrit en Java et publié en open source sous licence Apache.
+            Elasticsearch est un serveur utilisant Lucene pour l'indexation et la recherche des données. Il fournit un moteur de recherche distribué et multi-entité à travers une interface REST.
           </p>
+        </section>
+
+        <section>
+          <h2>Big Data</h2>
+          <p>
+            Elasticsearch est «distribué» ce qui signifie que les données stockées sont divisées en éclats («shard» en anglais) sur un ou plusieurs nœuds. Afin de garantir la résilience, chaque éclats peut avoir zéros ou plusieurs répliques. Chaque nœud du cluster héberge un ou plusieurs éclats et agit en coordinateur pour déléguer les opérations au nœud qui contient le bon éclats. L'équilibrage et le routage sont réalisées automatiquement.
+          </p>
+        </section>
+
+        <section>
+          <h2>Licence</h2>
+          <p>L'éditeur des trois outils présenté est la société Elastic. Ils sont distribués sous licence libre (Apache) et sont tout à fait utilisable dans de nombreux cas. Des fonctionnalités orientés entreprises sont proposées avec des licences non libres.</p>
+        </section>
+
+        <section>
+          <h2>Installation Elasticsearch</h2>
+          <pre><code>Installer Java puis :
+wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.2.tar.gz
+tar -zxvf elasticsearch-1.7.2.tar.gz
+cd elasticsearch-1.7.2
+bin/elasticsearch</code></pre>
+        </section>
+
+        <section>
+          <h2>Kibana</h2>
+          <p>Permet de créer des visualisations à partir des données indexées dans Elasticsearch.</p>
+          <p>L'utilisateur peut créer différents types de graphe sur des larges volumes de données.</p>
+          <p>Installation:</p>
+          <pre><code>wget https://download.elastic.co/kibana/kibana/kibana-4.5.0-linux-x64.tar.gz
+tar -xzf kibana-4.5.0-linux-x64.tar.gz
+cd kibana-4.5.0-linux-x64
+bin/kibana
+http://localhost:5601</code></pre>
+        </section>
+
+        <section>
+          <h2>Applaudimètre</h2>
+          <p>Dans cette petite démonstration on va lire le microphone du PC et envoyer les données régulièrement dans Elasticsearch.</p>
+          <p>Code simplifié :</p>
+          <pre><code>arecord |
+awk '{ printf {"volume":%s , "@timestamp":"%s"}, $7,
+              strftime("%FT%T,0+0200",systime()); }' |
+curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
+          <p>Et on observe le resultat dans Kibana.</p>
+        </section>
+
+        <section>
+          <h2>Utilisation Kibana</h2>
+          <p>Settings: configurer les index que l'on désire observer</p>
+          <p>Discover: faire des recherches rapidement</p>
+          <p>Visualize: créer des visualisations. Plusieurs types sont proposée et il est simple de spécifier les données à associer.</p>
+          <p>Dashboard: un regroupement de visualisations.</p>
+        </section>
+
+        <section>
+          <h2>Orienté document</h2>
+          <p>Elasticsearch stocke les données sous forme de document.</p>
+          <p>Plus précisément, il indexe le contenu de chaque document pour permette les recherches.</p>
+          <p>Dans Elasticsearch on indexe, cherche, tri, et filtre des documents, pas des champs de données en colonne.</p>
+        </section>
+
+        <section>
+          <h2>JSON</h2>
+          <p>Elasticsearch utilise le format <a href='http://en.wikipedia.org/wiki/Json'>JSON</a> comme format de sérialisation des documents.</p>
+          <p>C'est un format courant dans le monde des base NoSQL, c'est simple concis et facile à lire.</p>
+          <pre><code>{
+  "user": "Bruno",
+  "info": {
+    "age": 25
+  }
+  "date": "2016/05/01"
+}</code></pre>
+        </section>
+
+        <section>
+          <h2>Concepts</h2>
+          <p>Dans Elasticsearch, un document appartient à un <i>type</i> et un type est mis dans un <i>index</i></p>
+          <table>
+            <tr>
+              <td>Base relationnelle</td>
+              <td>Bases</td>
+              <td>Tables</td>
+              <td>Lignes</td>
+              <td>Colonnes</td>
+            </tr>
+            <tr>
+              <td>Elasticsearch</td>
+              <td>Indices</td>
+              <td>Types</td>
+              <td>Documents</td>
+              <td>Fields</td>
+            </tr>
+          </table>
+        </section>
+
+        <section>
+          <h2>Index inversé</h2>
+          <p>Une <a href='https://fr.wikipedia.org/wiki/Base_de_donn%C3%A9es_relationnelle'>base relationnelle</a> crée un <i>index</i> (comme un B-tree) sur certaines colonnes pour accélérer les requêtes.</p>
+          <p>Par défaut dans Elasticsearch, tous les champs d'un document sont indexées sous la forme d'un index inversé de telle sorte que tout est recherchable.</p>
+        </section>
+
+        <section>
+          <h2>API</h2>
+          <p>Il existe des librairies pour accéder à Elasticsearch dans la plupart des languages</p>
+          <p>On peut aussi y accèder simplement via une API REST avec JSON en HTTP</p>
+          <pre><code>curl -X&lt;VERB&gt; 'http://&lt;HOST&gt;/&lt;PATH&gt;?&lt;QUERY_STRING&gt;' -d '&lt;BODY&gt;'</code></pre>
+          <p>VERB : GET, POST, PUT, HEAD, DELETE</p>
+          <p>QUERY_STRING : Une query optionnelle comme '?pretty=true'</p>
+          <p>BODY : Un document JSON</p>
+        </section>
+
+        <section>
+          <h2>Stocker un document dans Elasticsearch</h2>
+          <pre><code id="conf1putdocument"></code></pre>
+          <button id="conf1put"><h3>GO</h3></button>
+          <pre><code id="conf1putoutput"></code></pre>
+          <script>
+            $("#conf1put").ready(function(){
+                var url='http://localhost:9200/conf/toulibre/1';
+                var toulibre_doc_1 = { "location": "toulibre",
+                                       "date": "2016-05-04",
+                                       "title": "Présentation ELK" };
+                $("#conf1putdocument").text("curl -XPUT " + url  + " -d " + JSON.stringify(toulibre_doc_1, null, 2));
+                $("#conf1put").click(function() {
+                    $.put(url, JSON.stringify( toulibre_doc_1 ),
+                        function(data){
+                            $("#conf1putoutput").text(JSON.stringify(data, null, 2))
+                        },
+                        'json');
+                });
+            });
+          </script>
+        </section>
+
+        <section>
+          <h2>Récupérer le document</h2>
+          <pre><code id="conf1getdocument"></code></pre>
+          <button id="conf1get"><h3>GO</h3></button>
+          <script>
+            $("#conf1get").ready(function(){
+                var url='http://localhost:9200/conf/toulibre/1';
+                $("#conf1getdocument").text("curl -XGET " + url);
+                $("#conf1get").click(function(){
+                    $.getJSON(url,
+                        { pretty: 'true' }, function(data){
+                          $("#conf1getoutput").text(JSON.stringify(data, null, 2))
+                        }).fail(function(data) {
+                              $("#conf1getoutput").text(JSON.stringify(data, null, 2))
+                           });
+                });
+            });
+          </script>
+          <pre><code id="conf1getoutput"></code></pre>
+        </section>
+
+        <section>
+          <h2>Recherche simple</h2>
+          <pre><code id="conf1searchdocument"></code></pre>
+          <button id="conf1search"><h3>GO</h3></button>
+          <script>
+            $("#conf1search").ready(function(){
+                var url='http://localhost:9200/conf/toulibre/_search?q=location:toulibre';
+                $("#conf1searchdocument").text("curl -XGET " + url);
+                $("#conf1search").click(function(){
+                    $.getJSON(url,
+                        { pretty: 'true' }, function(data){
+                          $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
+                        }).fail(function(data) {
+                              $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
+                           });
+                });
+            });
+          </script>
+          <pre><code id="conf1searchoutput"></code></pre>
+        </section>
+
+        <section>
+          <h2>Recherche dans tous les champs</h2>
+          <pre><code id="conf2searchdocument"></code></pre>
+          <button id="conf2search"><h3>GO</h3></button>
+          <script>
+            $("#conf2search").ready(function(){
+                var url='http://localhost:9200/conf/toulibre/_search?q=_all:toulibre';
+                $("#conf2searchdocument").text("curl -XGET " + url);
+                $("#conf2search").click(function(){
+                    $.getJSON(url,
+                        { pretty: 'true' }, function(data){
+                          $("#conf2searchoutput").text(JSON.stringify(data, null, 2))
+                        }).fail(function(data) {
+                              $("#conf2searchoutput").text(JSON.stringify(data, null, 2))
+                           });
+                });
+            });
+          </script>
+          <pre><code id="conf2searchoutput"></code></pre>
+        </section>
+
+        <section>
+          <h2>Supprimer un document</h2>
+          <pre><code id="conf1deldocument"></code></pre>
+          <button id="conf1del"><h3>GO</h3></button>
+          <script>
+            $("#conf1del").ready(function(){
+                var url='http://localhost:9200/conf/toulibre/1';
+                $("#conf1deldocument").text("curl -XDELETE " + url);
+                $("#conf1del").click(function() {
+                    $.delete(url, null,
+                        function(data){
+                            $("#conf1deloutput").text(JSON.stringify(data, null, 2))
+                        },
+                        'json');
+                });
+            });
+          </script>
+          <pre><code id="conf1deloutput"></code></pre>
+        </section>
+
+        <section>
+          <h2>Démo parsing du flux LinuxFR</h2>
+          <pre><code class="python">#!/usr/bin/python3
+import elasticsearch
+import feedparser
+
+es=elasticsearch.Elasticsearch('http://localhost:9200')
+data=feedparser.parse('http://linuxfr.org/news.atom')
+for news in data.entries:
+   print(es.index(index='linuxfr',doc_type='news',body=news))</code></pre>
+        </section>
+
+        <section>
+          <h2>Langage de requête</h2>
+          <p>Elasticsearch inclu un langage de requête en Json.</p>
+          <pre><code>GET /adl/all/_search
+ {
+   "query": {
+     "match": {
+       "popupContent": "toulibre"
+     }
+  }
+}</code></pre>
+        </section>
+
+        <section>
+          <h2>Analyse et agrégation</h2>
+          <p>Il est possible de faire des aggrégations à l'instar du <i>GROUP BY</i> en SQL mais en plus puissant.</p>
+          <pre><code>GET /adl/all/_search
+{
+    "aggs": {
+        "ville": {
+           "terms": { "field": "city" }
+        }
+    }
+}</code></pre>
+        </section>
+
+        <section>
+          <h2>Rechercher un document</h2>
+
+          <p>Les conférences de Toulibre</p>
+          <pre><code>GET /adl/all/_search?q=location:toulibre'</code></pre>
+
+          <p>Les conférences autres que Toulibre</p>
+          <pre><code>GET /adl/all/_search?q=-location:toulibre'</code></pre>
+
+          <p>Les conférence Toulibre mais pas sur ELK</p>
+          <pre><code>GET /adl/all/
+      _search?q=+location:toulibre%20-title:ELK'</code></pre>
+        </section>
+
+        <section>
+          <h2>Rechercher un document par date</h2>
+          <p>Les conférences de l'année dernière</p>
+          <pre><code>GET /adl/all/_search' -d '
+{
+  "query" : {
+    "range" : {
+      "date" : { "from" : "2015-01-01", "to" : "2016-01-01" }
+    }
+  }
+}'</code></pre>
+        </section>
+
+        <section>
+          <h2>Logstash</h2>
+          <p>Logstash est un "ETL" (Extract Transform Load). initialement destiné aux logs, il permet de parser des données peu structurées et d'en sortir des documents json prêts à être injectés par exemple dans Elasticsearch</p>
+        </section>
+
+        <section>
+          <h2>Installation Logstash</h2>
+          <pre><code>Installer Java puis:
+wget https://download.elastic.co/logstash/logstash/logstash-2.3.2.tar.gz
+tar -zxvf logstash-2.3.2.tar.gz
+cd logstash-2.3.2
+bin/elasticsearch agent -f logstash.conf</code></pre>
+        </section>
+
+        <section>
+          <h2>Configuration Logstash</h2>
+          <p>Une configuration Logstash se décompose en 3 parties, les <b>'input'</b> les <b>'filters'</b> et les <b>'output'</b>.</p>
+          <li class="fragment" data-fragment-index="0"><b>input:</b> ce sont un ou plusieurs type d'entrèes que logstash va attendre</li>
+          <li class="fragment" data-fragment-index="1"><b>filter:</b> on décrit des opérations à réaliser sur les données reçues. Typiquement on parse les donnée pour en extraire les champs qui nous intéressent</li>
+          <li class="fragment" data-fragment-index="2"><b>output</b>: une ou plusieurs sorties vers lesquelles les données filtrées sont envoyées</li>
+        </section>
+
+        <section>
+          <h2>Exemple Logstash</h2>
+          <p>Prenons l'exemple d'un parsing de log Apache.</p>
+          <p>Ceux-ci sont de la forme :</p>
+          <p>IP - - [DATE] "VERB URI HTTP/1.1" HTTP_RESP_CODE SIZE "REFERER" "USER_AGENT"</p>
+        </section>
+
+        <section>
+          <h2>Logstash Input</h2>
+          <pre><code>input {
+    file {
+      path => "/tmp/http.log"
+      start_position => "beginning"
+    }
+}</code></pre>
+        </section>
+
+        <section>
+          <h2>Logstash Filter</h2>
+          <pre><code>filter {
+  grok {
+    match => { "message" => "%{IP:ip} - - \[%{DATA:timestamp}\]
+          %{QUOTEDSTRING:qs} %{INT:http_status_code} %{INT:bytes_read}
+          %{QUOTEDSTRING:from} %{QUOTEDSTRING:user_agent}" }
+  }
+  grok {
+    match => { "qs" => "\"%{WORD:verb} %{URIPATHPARAM:uri_path}
+         %{DATA:http_version}\"" }
+  }
+  date {
+    locale => "en"
+    match => [ "timestamp" , "dd/MMM/yyyy:HH:mm:ss Z" ]
+  }
+  geoip {
+    source => "ip"
+  }
+}</code></pre>
+        </section>
+
+        <section>
+          <h2>Logstash Output</h2>
+          <pre><code>output {
+  elasticsearch {
+     index => "logstash-gcompris"
+  }
+}</code></pre>
+        </section>
+
+        <section>
+          <h2>Document généré</h2>
+          <pre><code>"message": "180.76.15.143 - - [23/Apr/2016:23:59:59 +0200]
+  \"GET /wiki HTTP/1.1\" 200 5573 \"-\" \"Mozilla/5.0\"",
+"@timestamp": "2016-04-23T21:59:59.000Z",
+"ip": "180.76.15.143",
+"http_status_code": "200",
+"bytes_read": 5573,
+"from": "\"-\"",
+"user_agent": "\"Mozilla/5.0\"",
+"verb": "GET",
+"uri_path": "/wiki",
+"http_version": "HTTP/1.1",
+"geoip": {
+  "latitude": 39.9289,
+  "longitude": 116.38830000000002,
+ }</code></pre>
         </section>
 
       </div>
@@ -75,15 +457,15 @@
 
       // More info https://github.com/hakimel/reveal.js#dependencies
       dependencies: [
-      { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-      { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-      { src: 'plugin/zoom-js/zoom.js', async: true },
-      { src: 'plugin/notes/notes.js', async: true }
+      { src: 'revealjs/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'revealjs/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'revealjs/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'revealjs/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'revealjs/plugin/zoom-js/zoom.js', async: true },
+      { src: 'revealjs/plugin/notes/notes.js', async: true }
       ]
       });
-
+      Reveal.configure({ slideNumber: 'c/t' });
     </script>
 
   </body>
