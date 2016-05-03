@@ -1,0 +1,9 @@
+button {
+    background-color: #008CBA;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    padding: 20px 30px 20px 30px;
+}

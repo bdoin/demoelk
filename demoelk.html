@@ -16,6 +16,7 @@
 
     <link rel="stylesheet" href="revealjs/css/reveal.css">
     <link rel="stylesheet" href="revealjs/css/theme/beige.css" id="theme">
+    <link rel="stylesheet" href="style.css">
 
     <!-- Printing and PDF exports -->
     <script>
@@ -180,7 +181,7 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
         <section>
           <h2>Stocker un document dans Elasticsearch</h2>
           <pre><code id="conf1putdocument"></code></pre>
-          <button id="conf1put"><h3>GO</h3></button>
+          <button id="conf1put">GO</button>
           <pre><code id="conf1putoutput"></code></pre>
           <script>
             $("#conf1put").ready(function(){
@@ -201,17 +202,44 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
         </section>
 
         <section>
+          <h2>Stocker un autre document dans Elasticsearch</h2>
+          <pre><code id="conf2putdocument"></code></pre>
+          <button id="conf2put">GO</button>
+          <pre><code id="conf2putoutput"></code></pre>
+          <script>
+            $("#conf2put").ready(function(){
+                var url='http://localhost:9200/conf/toulibre/2';
+                var toulibre_doc_2 = { "location": "toulibre",
+                                       "date": "2016-05-24",
+                                       "title": "Bouffe Qjelt" };
+                $("#conf2putdocument").text("curl -XPUT " + url  + " -d " + JSON.stringify(toulibre_doc_2, null, 2));
+                $("#conf2put").click(function() {
+                    $.put(url, JSON.stringify( toulibre_doc_2 ),
+                        function(data){
+                            $("#conf2putoutput").text(JSON.stringify(data, null, 2))
+                        },
+                        'json');
+                });
+            });
+          </script>
+        </section>
+
+        <section>
           <h2>Récupérer le document</h2>
           <pre><code id="conf1getdocument"></code></pre>
-          <button id="conf1get"><h3>GO</h3></button>
+          <button id="conf1get">GO</button>
           <script>
             $("#conf1get").ready(function(){
-                var url='http://localhost:9200/conf/toulibre/1';
-                $("#conf1getdocument").text("curl -XGET " + url);
+                var index = 0
+                var url= ['http://localhost:9200/conf/toulibre/1',
+                          'http://localhost:9200/conf/toulibre/2'];
+                $("#conf1getdocument").text("curl -XGET " + url[index]);
                 $("#conf1get").click(function(){
-                    $.getJSON(url,
+                    $.getJSON(url[index],
                         { pretty: 'true' }, function(data){
-                          $("#conf1getoutput").text(JSON.stringify(data, null, 2))
+                        $("#conf1getoutput").text(JSON.stringify(data, null, 2));
+                        index = (index + 1) % url.length;
+                        $("#conf1getdocument").text("curl -XGET " + url[index]);
                         }).fail(function(data) {
                               $("#conf1getoutput").text(JSON.stringify(data, null, 2))
                            });
@@ -223,16 +251,20 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
 
         <section>
           <h2>Recherche simple</h2>
-          <pre><code id="conf1searchdocument"></code></pre>
-          <button id="conf1search"><h3>GO</h3></button>
+          <p id="conf1searchdocument"></p>
+          <button id="conf1search">GO</button>
           <script>
             $("#conf1search").ready(function(){
-                var url='http://localhost:9200/conf/toulibre/_search?q=location:toulibre';
-                $("#conf1searchdocument").text("curl -XGET " + url);
+                var index = 0
+                var url= ['http://localhost:9200/conf/toulibre/_search?q=location:toulibre',
+                          'http://localhost:9200/conf/toulibre/_search?q=location:toulibre%20-title:qjelt'];
+                $("#conf1searchdocument").text("curl -XGET " + url[index]);
                 $("#conf1search").click(function(){
-                    $.getJSON(url,
+                    $.getJSON(url[index],
                         { pretty: 'true' }, function(data){
                           $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
+                          index = (index + 1) % url.length;
+                          $("#conf1searchdocument").text("curl -XGET " + url[index]);
                         }).fail(function(data) {
                               $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
                            });
@@ -245,7 +277,7 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
         <section>
           <h2>Recherche dans tous les champs</h2>
           <pre><code id="conf2searchdocument"></code></pre>
-          <button id="conf2search"><h3>GO</h3></button>
+          <button id="conf2search">GO</button>
           <script>
             $("#conf2search").ready(function(){
                 var url='http://localhost:9200/conf/toulibre/_search?q=_all:toulibre';
@@ -266,15 +298,19 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
         <section>
           <h2>Supprimer un document</h2>
           <pre><code id="conf1deldocument"></code></pre>
-          <button id="conf1del"><h3>GO</h3></button>
+          <button id="conf1del">GO</button>
           <script>
             $("#conf1del").ready(function(){
-                var url='http://localhost:9200/conf/toulibre/1';
-                $("#conf1deldocument").text("curl -XDELETE " + url);
+                var index = 0
+                var url= ['http://localhost:9200/conf/toulibre/1',
+                          'http://localhost:9200/conf/toulibre/2'];
+                $("#conf1deldocument").text("curl -XDELETE " + url[index]);
                 $("#conf1del").click(function() {
-                    $.delete(url, null,
+                    $.delete(url[index], null,
                         function(data){
                             $("#conf1deloutput").text(JSON.stringify(data, null, 2))
+                            index = (index + 1) % url.length;
+                            $("#conf1deldocument").text("curl -XDELETE " + url[index]);
                         },
                         'json');
                 });
