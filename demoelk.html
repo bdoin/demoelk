@@ -334,11 +334,11 @@ for news in data.entries:
         <section>
           <h2>Langage de requête</h2>
           <p>Elasticsearch inclu un langage de requête en Json.</p>
-          <pre><code>GET /adl/all/_search
+          <pre><code>GET /linuxfr/news/_search
  {
    "query": {
      "match": {
-       "popupContent": "toulibre"
+       "content": "virtualisation"
      }
   }
 }</code></pre>
@@ -347,38 +347,50 @@ for news in data.entries:
         <section>
           <h2>Analyse et agrégation</h2>
           <p>Il est possible de faire des aggrégations à l'instar du <i>GROUP BY</i> en SQL mais en plus puissant.</p>
-          <pre><code>GET /adl/all/_search
+          <pre><code>GET /linuxfr/news/_search
 {
     "aggs": {
-        "ville": {
-           "terms": { "field": "city" }
+        "auteur": {
+           "terms": { "field": "author" }
         }
     }
 }</code></pre>
         </section>
 
         <section>
-          <h2>Rechercher un document</h2>
-
-          <p>Les conférences de Toulibre</p>
-          <pre><code>GET /adl/all/_search?q=location:toulibre'</code></pre>
-
-          <p>Les conférences autres que Toulibre</p>
-          <pre><code>GET /adl/all/_search?q=-location:toulibre'</code></pre>
-
-          <p>Les conférence Toulibre mais pas sur ELK</p>
-          <pre><code>GET /adl/all/
-      _search?q=+location:toulibre%20-title:ELK'</code></pre>
+          <h2>Résultat agrégation</h2>
+          <button id="linuxfr1agg">GO</button>
+          <script>
+            $("#linuxfr1agg").ready(function(){
+                var url='http://localhost:9200/linuxfr/news/_search?pretty';
+                var query={ "size": 0,
+                            "aggs": {
+                              "auteur": {
+                                "terms": { "field": "author" }
+                              }
+                            }
+                          };
+                $("#linuxfr1agg").click(function(){
+                    $.post(url,
+                           JSON.stringify(query), function(data){
+                             $("#linuxfr1aggoutput").text(JSON.stringify(data, null, 2))
+                        }).fail(function(data) {
+                              $("#linuxfr1aggoutput").text(JSON.stringify(data, null, 2))
+                           });
+                });
+            });
+          </script>
+          <pre><code id="linuxfr1aggoutput"></code></pre>
         </section>
 
         <section>
           <h2>Rechercher un document par date</h2>
           <p>Les conférences de l'année dernière</p>
-          <pre><code>GET /adl/all/_search' -d '
+          <pre><code>GET /linuxfr/news/_search' -d '
 {
   "query" : {
     "range" : {
-      "date" : { "from" : "2015-01-01", "to" : "2016-01-01" }
+      "published" : { "from" : "2015-01-01", "to" : "2016-01-01" }
     }
   }
 }'</code></pre>
