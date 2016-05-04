@@ -91,6 +91,11 @@ bin/elasticsearch</code></pre>
         </section>
 
         <section>
+          <h2><a href='http://www.elastichq.org/'>Elastic HQ</a></h2>
+          <p>Une interface intuitive pour monitorer un cluster Elasticsearch</p>
+        </section>
+
+        <section>
           <h2>Kibana</h2>
           <p>Permet de créer des visualisations à partir des données indexées dans Elasticsearch.</p>
           <p>L'utilisateur peut créer différents types de graphe sur des larges volumes de données.</p>
@@ -227,51 +232,31 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
         <section>
           <h2>Récupérer le document</h2>
           <pre><code id="conf1getdocument"></code></pre>
+          <button id="conf1getnext">NEXT</button>
           <button id="conf1get">GO</button>
           <script>
+            var index = 0;
+            var url= ['http://localhost:9200/conf/toulibre/1',
+                      'http://localhost:9200/conf/toulibre/2'];
             $("#conf1get").ready(function(){
-                var index = 0
-                var url= ['http://localhost:9200/conf/toulibre/1',
-                          'http://localhost:9200/conf/toulibre/2'];
                 $("#conf1getdocument").text("curl -XGET " + url[index]);
                 $("#conf1get").click(function(){
                     $.getJSON(url[index],
                         { pretty: 'true' }, function(data){
                         $("#conf1getoutput").text(JSON.stringify(data, null, 2));
-                        index = (index + 1) % url.length;
-                        $("#conf1getdocument").text("curl -XGET " + url[index]);
                         }).fail(function(data) {
                               $("#conf1getoutput").text(JSON.stringify(data, null, 2))
                            });
                 });
             });
-          </script>
-          <pre><code id="conf1getoutput"></code></pre>
-        </section>
-
-        <section>
-          <h2>Recherche simple</h2>
-          <p id="conf1searchdocument"></p>
-          <button id="conf1search">GO</button>
-          <script>
-            $("#conf1search").ready(function(){
-                var index = 0
-                var url= ['http://localhost:9200/conf/toulibre/_search?q=location:toulibre',
-                          'http://localhost:9200/conf/toulibre/_search?q=location:toulibre%20-title:qjelt'];
-                $("#conf1searchdocument").text("curl -XGET " + url[index]);
-                $("#conf1search").click(function(){
-                    $.getJSON(url[index],
-                        { pretty: 'true' }, function(data){
-                          $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
-                          index = (index + 1) % url.length;
-                          $("#conf1searchdocument").text("curl -XGET " + url[index]);
-                        }).fail(function(data) {
-                              $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
-                           });
+            $("#conf1getnext").ready(function(){
+                $("#conf1getnext").click(function(){
+                  index = (index + 1) % url.length;
+                  $("#conf1getdocument").text("curl -XGET " + url[index]);
                 });
             });
           </script>
-          <pre><code id="conf1searchoutput"></code></pre>
+          <pre><code id="conf1getoutput"></code></pre>
         </section>
 
         <section>
@@ -280,7 +265,7 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
           <button id="conf2search">GO</button>
           <script>
             $("#conf2search").ready(function(){
-                var url='http://localhost:9200/conf/toulibre/_search?q=_all:toulibre';
+                var url='http://localhost:9200/conf/toulibre/_search?q=toulibre';
                 $("#conf2searchdocument").text("curl -XGET " + url);
                 $("#conf2search").click(function(){
                     $.getJSON(url,
@@ -296,23 +281,58 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
         </section>
 
         <section>
+          <h2>Recherche simple</h2>
+          <p id="conf1searchdocument"></p>
+          <button id="conf1searchnext">NEXT</button>
+          <button id="conf1search">GO</button>
+          <script>
+            var index = 0
+            var url= ['http://localhost:9200/conf/toulibre/_search?q=location:toulibre',
+                      'http://localhost:9200/conf/toulibre/_search?q=location:toulibre%20-title:qjelt'];
+            $("#conf1search").ready(function(){
+                $("#conf1searchdocument").text("curl -XGET " + url[index]);
+                $("#conf1search").click(function(){
+                    $.getJSON(url[index],
+                        { pretty: 'true' }, function(data){
+                          $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
+                        }).fail(function(data) {
+                              $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
+                           });
+                });
+            });
+            $("#conf1searchnext").ready(function(){
+                $("#conf1searchnext").click(function(){
+                  index = (index + 1) % url.length;
+                  $("#conf1searchdocument").text("curl -XGET " + url[index]);
+                });
+            });
+          </script>
+          <pre><code id="conf1searchoutput"></code></pre>
+        </section>
+
+        <section>
           <h2>Supprimer un document</h2>
           <pre><code id="conf1deldocument"></code></pre>
+          <button id="conf1delnext">NEXT</button>
           <button id="conf1del">GO</button>
           <script>
+            var index = 0
+            var url= ['http://localhost:9200/conf/toulibre/1',
+                      'http://localhost:9200/conf/toulibre/2'];
             $("#conf1del").ready(function(){
-                var index = 0
-                var url= ['http://localhost:9200/conf/toulibre/1',
-                          'http://localhost:9200/conf/toulibre/2'];
                 $("#conf1deldocument").text("curl -XDELETE " + url[index]);
                 $("#conf1del").click(function() {
                     $.delete(url[index], null,
                         function(data){
                             $("#conf1deloutput").text(JSON.stringify(data, null, 2))
-                            index = (index + 1) % url.length;
-                            $("#conf1deldocument").text("curl -XDELETE " + url[index]);
                         },
                         'json');
+                });
+            });
+            $("#conf1delnext").ready(function(){
+                $("#conf1delnext").click(function(){
+                  index = (index + 1) % url.length;
+                  $("#conf1deldocument").text("curl -XDELETE " + url[index]);
                 });
             });
           </script>
@@ -329,6 +349,7 @@ es=elasticsearch.Elasticsearch('http://localhost:9200')
 data=feedparser.parse('http://linuxfr.org/news.atom')
 for news in data.entries:
    print(es.index(index='linuxfr',doc_type='news',body=news))</code></pre>
+          <p>Voir le <a target="_blank" href="http://localhost:5601/#/dashboard/default?_a=(filters:!(),panels:!((col:1,id:linuxfr_published_per_day,row:1,size_x:6,size_y:5,type:visualization),(col:7,id:linuxfr_tags,row:1,size_x:3,size_y:3,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:default)&_g=(refreshInterval:(display:'5%20seconds',pause:!f,section:1,value:5000),time:(from:now-30d,mode:quick,to:now))">dashboard Kibana</a>.</p>
         </section>
 
         <section>
@@ -347,6 +368,7 @@ for news in data.entries:
         <section>
           <h2>Analyse et agrégation</h2>
           <p>Il est possible de faire des aggrégations à l'instar du <i>GROUP BY</i> en SQL mais en plus puissant.</p>
+          <p>Avec Elasticsearch les agrégations sont réalisées sur les données indexées en texte plein.</p>
           <pre><code>GET /linuxfr/news/_search
 {
     "aggs": {
@@ -381,6 +403,28 @@ for news in data.entries:
             });
           </script>
           <pre><code id="linuxfr1aggoutput"></code></pre>
+        </section>
+
+        <section>
+          <h2>Mapping</h2>
+          <p>Un «mapping» est l'équivalant d'un schéma de base en SQL.</p>
+          <p>Il définit comment un document et les champs qu'il contient sont stockés et indexés.</p>
+          <p>Par défaut Elasticsearch crée un mapping dynamique, à la premier apparition d'un champs, il l'analyse et le type.</p>
+          <p>Il est ensuite invariant.</p>
+        </section>
+
+        <section>
+          <h2>Type des données</h2>
+          <p>Types de base : string, long, integer, short, byte, double, float, date, boolean, binary</p>
+          <p>Type avancés : array, nested, geo-point, geo-shape, IPv4</p>
+        </section>
+
+        <section>
+          <h2>Attributs de Mapping</h2>
+          <p>Pour chaque champs d'un mapping on peut spécifier des attributs :</p>
+          <li class="fragment" data-fragment-index="0"><b>analyzed</b> : le contenu est analysé puis indexé. On peut faire des recherches plein texte.</li>
+          <li class="fragment" data-fragment-index="1"><b>not_analyzed</b> : le contenu n'est pas analysé mais est indexé.</li>
+          <li class="fragment" data-fragment-index="2"><b>none</b>: le contenu est stocké mais pas indexé</li>
         </section>
 
         <section>
@@ -436,12 +480,20 @@ bin/elasticsearch agent -f logstash.conf</code></pre>
         </section>
 
         <section>
+          <h2>Pattern prédéfinis</h2>
+          <p>Logstash est livré avec des patterns de recherche les plus courants.</p>
+          <p>Entête syslog, IP, DATA, INT, WORD, QUOTEDSTRING, ...</p>
+          <p>On extrait et stocke le résultat dans une variable avec la syntaxe %{INT:speed}</p>
+        </section>
+
+        <section>
           <h2>Logstash Filter</h2>
-          <pre><code>filter {
+          <p>164.132.161.69 - - [18/Apr/2016:05:09:23 +0200] "GET /mediawiki HTTP/1.1" 200 5795 "-" "Mozilla"</p>
+          <pre><code data-trim data-noescape>filter {
   grok {
-    match => { "message" => "%{IP:ip} - - \[%{DATA:timestamp}\]
-          %{QUOTEDSTRING:qs} %{INT:http_status_code} %{INT:bytes_read}
-          %{QUOTEDSTRING:from} %{QUOTEDSTRING:user_agent}" }
+    match => { "message" => "<mark>%{IP:ip}</mark> - - \[<mark>%{DATA:timestamp}</mark>\]
+          <mark>%{QUOTEDSTRING:qs}</mark> <mark>%{INT:http_status_code}</mark> <mark>%{INT:bytes_read}</mark>
+          <mark>%{QUOTEDSTRING:from}</mark> <mark>%{QUOTEDSTRING:user_agent}</mark>" }
   }
   grok {
     match => { "qs" => "\"%{WORD:verb} %{URIPATHPARAM:uri_path}
@@ -483,6 +535,7 @@ bin/elasticsearch agent -f logstash.conf</code></pre>
   "latitude": 39.9289,
   "longitude": 116.38830000000002,
  }</code></pre>
+          <p>Dashboard <a target="_blank" href="http://localhost:5601/#/dashboard/logstash-gcompris?_a=(filters:!(),panels:!((col:1,id:logstash-gcompris-map,row:1,size_x:4,size_y:4,type:visualization),(col:5,id:gcompris-logstash,row:1,size_x:6,size_y:4,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:logstash-gcompris)&_g=(refreshInterval:(display:'5%20seconds',pause:!t,section:1,value:5000),time:(from:now-30d,mode:quick,to:now))">Kibana</a>.
         </section>
 
       </div>
