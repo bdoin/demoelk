@@ -286,13 +286,13 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
           <button id="conf1searchnext">NEXT</button>
           <button id="conf1search">GO</button>
           <script>
-            var index = 0
-            var url= ['http://localhost:9200/conf/toulibre/_search?q=location:toulibre',
-                      'http://localhost:9200/conf/toulibre/_search?q=location:toulibre%20-title:qjelt'];
+            var index = 0;
+            var urlsearch = ['http://localhost:9200/conf/toulibre/_search?q=location:toulibre',
+                             'http://localhost:9200/conf/toulibre/_search?q=location:toulibre%20-title:qjelt'];
             $("#conf1search").ready(function(){
-                $("#conf1searchdocument").text("curl -XGET " + url[index]);
+                $("#conf1searchdocument").text("curl -XGET " + urlsearch[index]);
                 $("#conf1search").click(function(){
-                    $.getJSON(url[index],
+                    $.getJSON(urlsearch[index],
                         { pretty: 'true' }, function(data){
                           $("#conf1searchoutput").text(JSON.stringify(data, null, 2))
                         }).fail(function(data) {
@@ -302,8 +302,8 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
             });
             $("#conf1searchnext").ready(function(){
                 $("#conf1searchnext").click(function(){
-                  index = (index + 1) % url.length;
-                  $("#conf1searchdocument").text("curl -XGET " + url[index]);
+                  index = (index + 1) % urlsearch.length;
+                  $("#conf1searchdocument").text("curl -XGET " + urlsearch[index]);
                 });
             });
           </script>
@@ -317,12 +317,12 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
           <button id="conf1del">GO</button>
           <script>
             var index = 0
-            var url= ['http://localhost:9200/conf/toulibre/1',
+            var urldel= ['http://localhost:9200/conf/toulibre/1',
                       'http://localhost:9200/conf/toulibre/2'];
             $("#conf1del").ready(function(){
-                $("#conf1deldocument").text("curl -XDELETE " + url[index]);
+                $("#conf1deldocument").text("curl -XDELETE " + urldel[index]);
                 $("#conf1del").click(function() {
-                    $.delete(url[index], null,
+                    $.delete(urldel[index], null,
                         function(data){
                             $("#conf1deloutput").text(JSON.stringify(data, null, 2))
                         },
@@ -331,8 +331,8 @@ curl -s -XPOST 'localhost:9200/record/volume' -d {}</code></pre>
             });
             $("#conf1delnext").ready(function(){
                 $("#conf1delnext").click(function(){
-                  index = (index + 1) % url.length;
-                  $("#conf1deldocument").text("curl -XDELETE " + url[index]);
+                  index = (index + 1) % urldel.length;
+                  $("#conf1deldocument").text("curl -XDELETE " + urldel[index]);
                 });
             });
           </script>
@@ -384,7 +384,7 @@ for news in data.entries:
           <button id="linuxfr1agg">GO</button>
           <script>
             $("#linuxfr1agg").ready(function(){
-                var url='http://localhost:9200/linuxfr/news/_search?pretty';
+                var urlagg ='http://localhost:9200/linuxfr/news/_search?pretty';
                 var query={ "size": 0,
                             "aggs": {
                               "auteur": {
@@ -393,7 +393,7 @@ for news in data.entries:
                             }
                           };
                 $("#linuxfr1agg").click(function(){
-                    $.post(url,
+                    $.post(urlagg,
                            JSON.stringify(query), function(data){
                              $("#linuxfr1aggoutput").text(JSON.stringify(data, null, 2))
                         }).fail(function(data) {
